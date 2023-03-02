@@ -1,5 +1,10 @@
 import "./globals.css";
 
+export const metadata = {
+  title: "Chainsprout",
+  description: "A (very) simplified version of linktree",
+};
+
 export default function RootLayout({
   children,
 }: {

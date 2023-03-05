@@ -1,12 +1,26 @@
-import { Metadata } from "next";
-import React from "react";
+import supabase from "@/utils/supabase";
+import { upperCaseFirstLetter } from "@/utils/utilFunctions";
 
-export async function generateMetadata({ params }: any): Promise<Metadata> {
-  return { title: "test" };
+export interface Params {
+  params: { user: string };
 }
 
-const User = ({ params }: { params: { slug: string } }) => {
-  return <p>slug: {params.slug}</p>;
+export function generateMetadata({ params: { user } }: Params) {
+  const userFormatted = upperCaseFirstLetter(user);
+  return { title: userFormatted, description: `${userFormatted}'s page` };
+}
+
+const User = async ({ params: { user } }: Params) => {
+  const { data: posts } = await supabase.from("posts").select();
+
+  console.log(posts);
+
+  return (
+    <div>
+      <p>{upperCaseFirstLetter(user)}</p>
+      {/* <UserData user={} /> */}
+    </div>
+  );
 };
 
 export default User;

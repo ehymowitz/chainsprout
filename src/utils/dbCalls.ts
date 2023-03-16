@@ -5,7 +5,10 @@ async function getUserID(name: string) {
 }
 
 async function getUserLinks(id: string) {
-  return await supabase.from("links").select("title, link").eq("user", id);
+  return await supabase
+    .from("links")
+    .select("title, link, description")
+    .eq("user", id);
 }
 
 export const getUserData = async (user: string) => {
@@ -21,5 +24,5 @@ export const getUserData = async (user: string) => {
   const { data: links, error: linksError } = await getUserLinks(id);
   if (linksError) console.log(linksError);
 
-  return links;
+  return links || undefined;
 };

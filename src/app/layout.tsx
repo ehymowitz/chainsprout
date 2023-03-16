@@ -1,4 +1,4 @@
-import "./globals.css";
+import "../globals.css";
 
 export const metadata = {
   title: "Chainsprout",
@@ -12,7 +12,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="text-center p-10 font-mono text-sm tracking-widest">
+      <body className="text-center py-10 font-mono text-sm bg-gray-100">
         {children}
       </body>
     </html>

@@ -5,7 +5,11 @@ module.exports = {
     fontFamily: {
       mono: ["monospace"],
     },
-    extend: {},
+    extend: {
+      spacing: {
+        128: "32rem",
+      },
+    },
   },
   plugins: [],
 };

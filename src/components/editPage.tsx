@@ -1,30 +1,37 @@
 "use client";
+import { Link } from "@/utils/types";
 import { useEffect, useState } from "react";
 
 const emptyLink = [{ title: "", link: "", description: "" }];
 
 interface EditPageProps {
-  dbLinks?: {
-    title: any;
-    link: any;
-    description: any;
-  }[];
+  dbLinks?: Link[];
+  user: string;
 }
 
-const EditPage = ({ dbLinks }: EditPageProps) => {
+const EditPage = ({ dbLinks, user }: EditPageProps) => {
   const [showForm, setShowForm] = useState(false);
   const [password, setPassword] = useState("");
-  const [links, setLinks] = useState(emptyLink);
+  const [links, setLinks] = useState(dbLinks || emptyLink);
 
   useEffect(() => {
-    console.log(links);
     if (links.length <= 0) {
       setShowForm(false);
     }
   }, [links]);
+
   useEffect(() => {
-    setLinks(emptyLink);
-  }, [showForm]);
+    setLinks(dbLinks || emptyLink);
+  }, [dbLinks, showForm]);
+
+  const handleSubmit = async () => {
+    const res = await fetch("/users", {
+      method: "POST",
+      body: JSON.stringify({ user, links, password }),
+    });
+    const data = await res.json();
+    console.log(data);
+  };
 
   return (
     <div className="text-xs absolute top-5 right-5 h-5/6 overflow-auto">
@@ -59,7 +66,7 @@ const EditPage = ({ dbLinks }: EditPageProps) => {
                 />
                 <input
                   type="text"
-                  value={link.link}
+                  value={link.link || ""}
                   onChange={(e) =>
                     setLinks((c) => {
                       const newLinks = [...c];
@@ -76,7 +83,7 @@ const EditPage = ({ dbLinks }: EditPageProps) => {
                 />
                 <input
                   type="text"
-                  value={link.description}
+                  value={link.description || ""}
                   onChange={(e) =>
                     setLinks((c) => {
                       const newLinks = [...c];
@@ -92,7 +99,6 @@ const EditPage = ({ dbLinks }: EditPageProps) => {
                   placeholder="description"
                 />
               </div>
-
               <button
                 onClick={() =>
                   setLinks((c) => {
@@ -106,17 +112,24 @@ const EditPage = ({ dbLinks }: EditPageProps) => {
               </button>
             </div>
           ))}
-          <button
-            onClick={() =>
-              setLinks((c) => {
-                const newLinks = [...c];
-                newLinks.push({ title: "", link: "", description: "" });
-                return newLinks;
-              })
-            }
-          >
-            +
-          </button>
+          <div className="flex justify-around">
+            {links[links.length - 1]?.title !== "" && (
+              <button
+                onClick={() =>
+                  setLinks((c) => {
+                    const newLinks = [...c];
+                    newLinks.push({ title: "", link: "", description: "" });
+                    return newLinks;
+                  })
+                }
+              >
+                +
+              </button>
+            )}
+            {links.every((link) => link.title !== "") && (
+              <button onClick={() => handleSubmit()}>submit</button>
+            )}
+          </div>
         </div>
       ) : (
         <p onClick={() => setShowForm(true)}>

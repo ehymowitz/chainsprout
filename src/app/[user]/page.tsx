@@ -1,5 +1,5 @@
-import EditPage from "@/components/EditPage";
-import { getUserData } from "@/utils/dbCalls";
+import EditPage from "@/components/editPage";
+import { getUserLinks } from "@/utils/dbCalls";
 import { handleUserPageCharacters } from "@/utils/utilFunctions";
 
 export interface PageParams {
@@ -12,11 +12,11 @@ export function generateMetadata({ params: { user } }: PageParams) {
 }
 
 const User = async ({ params: { user } }: PageParams) => {
-  const links = await getUserData(user);
+  const links = await getUserLinks(user);
 
   return (
     <main className="w-128 m-auto text-center">
-      {<EditPage dbLinks={links} />}
+      {<EditPage dbLinks={links} user={user} />}
       <p>{handleUserPageCharacters(user)}</p>
       {!links && <p>this page is unclaimed</p>}
       <ul className="mt-10">
@@ -26,7 +26,7 @@ const User = async ({ params: { user } }: PageParams) => {
             className=""
           >
             <a
-              href={link.link}
+              href={link.link || undefined}
               target="_blank"
               className="underline hover:italic"
             >

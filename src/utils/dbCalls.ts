@@ -1,28 +1,51 @@
 import supabase from "./supabase";
+import { Link } from "./types";
 
 async function getUserID(name: string) {
-  return await supabase.from("users").select(`id`).eq("name", name);
+  const { data } = await supabase.from("users").select(`id`).eq("name", name);
+  return data ? data[0]?.id : undefined;
 }
 
-async function getUserLinks(id: string) {
-  return await supabase
+export async function getUserLinks(name: string) {
+  const id = await getUserID(name);
+
+  const { data } = await supabase
     .from("links")
     .select("title, link, description")
     .eq("user", id);
+
+  return data ? data : undefined;
 }
 
-export const getUserData = async (user: string) => {
-  let { data: IdData, error: idError } = await getUserID(user);
-  if (idError) console.log(idError);
+const getUserPassword = async (name: string) => {
+  const { data } = await supabase
+    .from("users")
+    .select("password")
+    .eq("name", name);
 
-  if (IdData?.length === 0) {
-    return undefined;
+  return data ? data[0]?.password : undefined;
+};
+
+export const upsertLinks = async (
+  name: string,
+  password: string,
+  links: Link[]
+) => {
+  const userPassword = await getUserPassword(name);
+  const id = await getUserID(name);
+
+  if (password !== userPassword) {
+    return "bad password";
   }
 
-  const id = IdData?.[0].id;
+  const linksWithUser: any = links.map((link, i) => ({
+    ...link,
+    user: id,
+  }));
 
-  const { data: links, error: linksError } = await getUserLinks(id);
-  if (linksError) console.log(linksError);
+  console.log(linksWithUser);
 
-  return links || undefined;
+  const { data, error } = await supabase.from("links").upsert(linksWithUser);
+
+  return error ? error : data;
 };

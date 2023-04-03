@@ -1,17 +1,18 @@
-import { upsertLinks } from "@/utils/dbCalls";
-import supabase from "@/utils/supabase";
+import { updateLinksList } from "@/utils/dbCalls";
 import { Link } from "@/utils/types";
-import { NextResponse, NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
     const {
       user,
-      links,
       password,
-    }: { user: string; links: Link[]; password: string } = await request.json();
+      dbLinks,
+      links,
+    }: { user: string; password: string; dbLinks: Link[]; links: Link[] } =
+      await request.json();
 
-    const data = await upsertLinks(user, password, links);
+    const data = await updateLinksList(user, password, dbLinks, links);
 
     return NextResponse.json(data);
   } catch (e) {

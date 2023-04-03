@@ -27,7 +27,7 @@ const EditPage = ({ dbLinks, user }: EditPageProps) => {
   const handleSubmit = async () => {
     const res = await fetch("/users", {
       method: "POST",
-      body: JSON.stringify({ user, links, password }),
+      body: JSON.stringify({ user, password, dbLinks, links }),
     });
     const data = await res.json();
     console.log(data);

@@ -1,5 +1,6 @@
 "use client";
 import { Link } from "@/utils/types";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const emptyLink = [{ title: "", link: "", description: "" }];
@@ -10,9 +11,11 @@ interface EditPageProps {
 }
 
 const EditPage = ({ dbLinks, user }: EditPageProps) => {
+  const router = useRouter();
   const [showForm, setShowForm] = useState(false);
   const [password, setPassword] = useState("");
   const [links, setLinks] = useState(dbLinks || emptyLink);
+  const [apiState, setApiState] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (links.length <= 0) {
@@ -25,12 +28,15 @@ const EditPage = ({ dbLinks, user }: EditPageProps) => {
   }, [dbLinks, showForm]);
 
   const handleSubmit = async () => {
+    setApiState("loading");
     const res = await fetch("/users", {
       method: "POST",
       body: JSON.stringify({ user, password, dbLinks, links }),
     });
-    const data = await res.json();
-    console.log(data);
+    const data: string = await res.json();
+
+    setApiState(Object.keys(data).length === 0 ? "submitted" : data);
+    router.refresh();
   };
 
   return (
@@ -130,6 +136,11 @@ const EditPage = ({ dbLinks, user }: EditPageProps) => {
               <button onClick={() => handleSubmit()}>submit</button>
             )}
           </div>
+          {apiState && (
+            <p className={apiState === "submitted" ? "" : "text-red-500"}>
+              {apiState}
+            </p>
+          )}
         </div>
       ) : (
         <p onClick={() => setShowForm(true)}>

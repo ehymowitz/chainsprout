@@ -67,6 +67,18 @@ export const updateLinksList = async (
     )
     .map((link) => link.title);
 
-  upsertLinks(id, linksToUpsert);
+  const linksToUpdate = newLinks
+    .filter((newLink) =>
+      dbLinks.some((dbLink) => dbLink.title === newLink.title)
+    )
+    .filter((link) => {
+      const oldLink = dbLinks.filter(
+        (dbLink) => link.title === dbLink.title
+      )[0];
+
+      return JSON.stringify(link) !== JSON.stringify(oldLink);
+    });
+
+  upsertLinks(id, linksToUpsert.concat(linksToUpdate));
   linksToDelete.forEach((link) => deleteLink(link));
 };

@@ -18,12 +18,6 @@ const EditPage = ({ dbLinks, user }: EditPageProps) => {
   const [apiState, setApiState] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    if (links.length <= 0) {
-      setShowForm(false);
-    }
-  }, [links]);
-
-  useEffect(() => {
     setLinks(dbLinks || emptyLink);
   }, [dbLinks, showForm]);
 
@@ -43,11 +37,23 @@ const EditPage = ({ dbLinks, user }: EditPageProps) => {
     <div className="text-xs absolute top-5 right-5 h-5/6 overflow-auto">
       {showForm ? (
         <div className="grid">
+          <button
+            className="pb-1 text-right"
+            onClick={() => {
+              setShowForm(false);
+              setApiState(undefined);
+            }}
+          >
+            close
+          </button>
           <input
             type="text"
             placeholder="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setApiState(undefined);
+              setPassword(e.target.value);
+            }}
             className="mb-4"
           />
           {links.map((link, i) => (
@@ -59,6 +65,7 @@ const EditPage = ({ dbLinks, user }: EditPageProps) => {
                   onChange={(e) =>
                     setLinks((c) => {
                       const newLinks = [...c];
+                      setApiState(undefined);
                       newLinks[i] = {
                         title: e.target.value,
                         link: newLinks[i].link,
@@ -76,6 +83,7 @@ const EditPage = ({ dbLinks, user }: EditPageProps) => {
                   onChange={(e) =>
                     setLinks((c) => {
                       const newLinks = [...c];
+                      setApiState(undefined);
                       newLinks[i] = {
                         title: newLinks[i].title,
                         link: e.target.value,
@@ -93,6 +101,7 @@ const EditPage = ({ dbLinks, user }: EditPageProps) => {
                   onChange={(e) =>
                     setLinks((c) => {
                       const newLinks = [...c];
+                      setApiState(undefined);
                       newLinks[i] = {
                         title: newLinks[i].title,
                         link: newLinks[i].link,
@@ -109,6 +118,7 @@ const EditPage = ({ dbLinks, user }: EditPageProps) => {
                 onClick={() =>
                   setLinks((c) => {
                     const newLinks = [...c];
+                    setApiState(undefined);
                     delete newLinks[i];
                     return newLinks.filter((e) => e !== undefined);
                   })
@@ -118,12 +128,16 @@ const EditPage = ({ dbLinks, user }: EditPageProps) => {
               </button>
             </div>
           ))}
+          {links.length === 0 && (
+            <button className="-mt-3 mb-1">remove user</button>
+          )}
           <div className="flex justify-around">
             {links[links.length - 1]?.title !== "" && (
               <button
                 onClick={() =>
                   setLinks((c) => {
                     const newLinks = [...c];
+                    setApiState(undefined);
                     newLinks.push({ title: "", link: "", description: "" });
                     return newLinks;
                   })

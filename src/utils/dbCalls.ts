@@ -37,8 +37,8 @@ const upsertLinks = async (userId: number, links: Link[]) => {
   return error ? error : data;
 };
 
-const deleteLink = async (title: string) => {
-  await supabase.from("links").delete().eq("title", title);
+const deleteLink = async (title: string, userId: number) => {
+  await supabase.from("links").delete().eq("title", title).eq("user", userId);
 };
 
 export const updateLinksList = async (
@@ -80,5 +80,18 @@ export const updateLinksList = async (
     });
 
   upsertLinks(id, linksToUpsert.concat(linksToUpdate));
-  linksToDelete.forEach((link) => deleteLink(link));
+  linksToDelete.forEach((link) => deleteLink(link, id));
+};
+
+export const removeUser = async (userName: string, password: string) => {
+  const userPassword = await getUserPassword(userName);
+
+  if (password !== userPassword) {
+    return "bad password";
+  }
+
+  const id = await getUserID(userName);
+
+  await supabase.from("links").delete().eq("user", id);
+  await supabase.from("users").delete().eq("name", userName);
 };

@@ -1,18 +1,12 @@
-import { updateLinksList } from "@/utils/dbCalls";
-import { Link } from "@/utils/types";
+import { removeUser } from "@/utils/dbCalls";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const {
-      user,
-      password,
-      dbLinks,
-      links,
-    }: { user: string; password: string; dbLinks: Link[]; links: Link[] } =
+    const { user, password }: { user: string; password: string } =
       await request.json();
 
-    const data = await updateLinksList(user, password, dbLinks, links);
+    const data = await removeUser(user, password);
 
     return NextResponse.json(data);
   } catch (e) {

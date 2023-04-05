@@ -10,12 +10,14 @@ interface EditPageProps {
   user: string;
 }
 
+type ApiState = "loading" | "submitted" | "user removed";
+
 const EditPage = ({ dbLinks, user }: EditPageProps) => {
   const router = useRouter();
   const [showForm, setShowForm] = useState(false);
   const [password, setPassword] = useState("");
   const [links, setLinks] = useState(dbLinks || emptyLink);
-  const [apiState, setApiState] = useState<string | undefined>(undefined);
+  const [apiState, setApiState] = useState<ApiState>();
 
   useEffect(() => {
     setLinks(dbLinks || emptyLink);
@@ -23,13 +25,28 @@ const EditPage = ({ dbLinks, user }: EditPageProps) => {
 
   const handleSubmit = async () => {
     setApiState("loading");
-    const res = await fetch("/users", {
+    const res = await fetch("/links", {
       method: "POST",
       body: JSON.stringify({ user, password, dbLinks, links }),
     });
-    const data: string = await res.json();
+    const data: ApiState = await res.json();
 
     setApiState(Object.keys(data).length === 0 ? "submitted" : data);
+    router.refresh();
+  };
+
+  const handleRemoveUser = async () => {
+    if (!confirm("Are you sure?")) return;
+
+    setApiState("loading");
+    const res = await fetch("/users", {
+      method: "POST",
+      body: JSON.stringify({ user, password }),
+    });
+
+    setApiState("user removed");
+    setPassword("");
+
     router.refresh();
   };
 
@@ -129,7 +146,9 @@ const EditPage = ({ dbLinks, user }: EditPageProps) => {
             </div>
           ))}
           {links.length === 0 && (
-            <button className="-mt-3 mb-1">remove user</button>
+            <button className="-mt-3 mb-1" onClick={() => handleRemoveUser()}>
+              remove user
+            </button>
           )}
           <div className="flex justify-around">
             {links[links.length - 1]?.title !== "" && (

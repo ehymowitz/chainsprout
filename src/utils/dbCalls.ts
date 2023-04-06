@@ -95,3 +95,8 @@ export const removeUser = async (userName: string, password: string) => {
   await supabase.from("links").delete().eq("user", id);
   await supabase.from("users").delete().eq("name", userName);
 };
+
+export const addUser = async (userName: string, password: string) => {
+  const res = await supabase.from("users").insert({ name: userName, password });
+  return res;
+};

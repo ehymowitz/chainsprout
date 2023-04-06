@@ -10,7 +10,7 @@ interface EditPageProps {
   user: string;
 }
 
-type ApiState = "loading" | "submitted" | "user removed";
+type ApiState = "loading" | "submitted" | "user removed" | "user added";
 
 const EditPage = ({ dbLinks, user }: EditPageProps) => {
   const router = useRouter();
@@ -18,6 +18,8 @@ const EditPage = ({ dbLinks, user }: EditPageProps) => {
   const [password, setPassword] = useState("");
   const [links, setLinks] = useState(dbLinks || emptyLink);
   const [apiState, setApiState] = useState<ApiState>();
+
+  const userExists = !!dbLinks;
 
   useEffect(() => {
     setLinks(dbLinks || emptyLink);
@@ -39,13 +41,25 @@ const EditPage = ({ dbLinks, user }: EditPageProps) => {
     if (!confirm("Are you sure?")) return;
 
     setApiState("loading");
-    const res = await fetch("/users", {
+    const res = await fetch("/users/remove", {
       method: "POST",
       body: JSON.stringify({ user, password }),
     });
 
     setApiState("user removed");
     setPassword("");
+
+    router.refresh();
+  };
+
+  const handleAddUser = async () => {
+    setApiState("loading");
+    const res = await fetch("/users/add", {
+      method: "POST",
+      body: JSON.stringify({ user, password }),
+    });
+
+    setApiState("user added");
 
     router.refresh();
   };
@@ -145,7 +159,7 @@ const EditPage = ({ dbLinks, user }: EditPageProps) => {
               </button>
             </div>
           ))}
-          {links.length === 0 && (
+          {links.length === 0 && userExists && (
             <button className="-mt-3 mb-1" onClick={() => handleRemoveUser()}>
               remove user
             </button>
@@ -166,7 +180,13 @@ const EditPage = ({ dbLinks, user }: EditPageProps) => {
               </button>
             )}
             {links.every((link) => link.title !== "") && (
-              <button onClick={() => handleSubmit()}>submit</button>
+              <button
+                onClick={() => {
+                  userExists ? handleSubmit() : handleAddUser();
+                }}
+              >
+                {userExists ? "submit" : "claim"}
+              </button>
             )}
           </div>
           {apiState && (
@@ -177,7 +197,7 @@ const EditPage = ({ dbLinks, user }: EditPageProps) => {
         </div>
       ) : (
         <p onClick={() => setShowForm(true)}>
-          {dbLinks ? "edit page" : "claim page"}
+          {userExists ? "edit page" : "claim page"}
         </p>
       )}
     </div>

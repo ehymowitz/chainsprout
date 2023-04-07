@@ -46,7 +46,10 @@ const EditPage = ({ dbLinks, user }: EditPageProps) => {
       body: JSON.stringify({ user, password }),
     });
 
-    setApiState("user removed");
+    const data: ApiState = await res.json();
+
+    setApiState(Object.keys(data).length === 0 ? "user removed" : data);
+
     setPassword("");
 
     router.refresh();
@@ -87,78 +90,79 @@ const EditPage = ({ dbLinks, user }: EditPageProps) => {
             }}
             className="mb-4"
           />
-          {links.map((link, i) => (
-            <div key={i}>
-              <div className="grid gap-2">
-                <input
-                  type="text"
-                  value={link.title}
-                  onChange={(e) =>
+          {userExists &&
+            links.map((link, i) => (
+              <div key={i}>
+                <div className="grid gap-2">
+                  <input
+                    type="text"
+                    value={link.title}
+                    onChange={(e) =>
+                      setLinks((c) => {
+                        const newLinks = [...c];
+                        setApiState(undefined);
+                        newLinks[i] = {
+                          title: e.target.value,
+                          link: newLinks[i].link,
+                          description: newLinks[i].description,
+                        };
+
+                        return newLinks;
+                      })
+                    }
+                    placeholder="title"
+                  />
+                  <input
+                    type="text"
+                    value={link.link || ""}
+                    onChange={(e) =>
+                      setLinks((c) => {
+                        const newLinks = [...c];
+                        setApiState(undefined);
+                        newLinks[i] = {
+                          title: newLinks[i].title,
+                          link: e.target.value,
+                          description: newLinks[i].description,
+                        };
+
+                        return newLinks;
+                      })
+                    }
+                    placeholder="link"
+                  />
+                  <input
+                    type="text"
+                    value={link.description || ""}
+                    onChange={(e) =>
+                      setLinks((c) => {
+                        const newLinks = [...c];
+                        setApiState(undefined);
+                        newLinks[i] = {
+                          title: newLinks[i].title,
+                          link: newLinks[i].link,
+                          description: e.target.value,
+                        };
+
+                        return newLinks;
+                      })
+                    }
+                    placeholder="description"
+                  />
+                </div>
+                <button
+                  onClick={() =>
                     setLinks((c) => {
                       const newLinks = [...c];
                       setApiState(undefined);
-                      newLinks[i] = {
-                        title: e.target.value,
-                        link: newLinks[i].link,
-                        description: newLinks[i].description,
-                      };
-
-                      return newLinks;
+                      delete newLinks[i];
+                      return newLinks.filter((e) => e !== undefined);
                     })
                   }
-                  placeholder="title"
-                />
-                <input
-                  type="text"
-                  value={link.link || ""}
-                  onChange={(e) =>
-                    setLinks((c) => {
-                      const newLinks = [...c];
-                      setApiState(undefined);
-                      newLinks[i] = {
-                        title: newLinks[i].title,
-                        link: e.target.value,
-                        description: newLinks[i].description,
-                      };
-
-                      return newLinks;
-                    })
-                  }
-                  placeholder="link"
-                />
-                <input
-                  type="text"
-                  value={link.description || ""}
-                  onChange={(e) =>
-                    setLinks((c) => {
-                      const newLinks = [...c];
-                      setApiState(undefined);
-                      newLinks[i] = {
-                        title: newLinks[i].title,
-                        link: newLinks[i].link,
-                        description: e.target.value,
-                      };
-
-                      return newLinks;
-                    })
-                  }
-                  placeholder="description"
-                />
+                >
+                  -
+                </button>
               </div>
-              <button
-                onClick={() =>
-                  setLinks((c) => {
-                    const newLinks = [...c];
-                    setApiState(undefined);
-                    delete newLinks[i];
-                    return newLinks.filter((e) => e !== undefined);
-                  })
-                }
-              >
-                -
-              </button>
-            </div>
-          ))}
+            ))}
           {links.length === 0 && userExists && (
             <button className="-mt-3 mb-1" onClick={() => handleRemoveUser()}>
               remove user
@@ -180,15 +184,14 @@ const EditPage = ({ dbLinks, user }: EditPageProps) => {
               </button>
             )}
             {links.every((link) => link.title !== "") && (
-              <button
-                onClick={() => {
-                  userExists ? handleSubmit() : handleAddUser();
-                }}
-              >
-                {userExists ? "submit" : "claim"}
-              </button>
+              <button onClick={() => handleSubmit()}>submit</button>
             )}
           </div>
+          {!userExists && (
+            <button className="-mt-3 mb-1" onClick={() => handleAddUser()}>
+              claim
+            </button>
+          )}
           {apiState && (
             <p className={apiState === "submitted" ? "" : "text-red-500"}>
               {apiState}

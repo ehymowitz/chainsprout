@@ -1,5 +1,7 @@
 import supabase from "./supabase";
 import { Link } from "./types";
+import { saltAndPepperPassword } from "./utilFunctions";
+import bcrypt from "bcryptjs";
 
 async function getUserID(name: string) {
   const { data } = await supabase.from("users").select(`id`).eq("name", name);
@@ -17,13 +19,15 @@ export async function getUserLinks(name: string) {
   return data ? data : undefined;
 }
 
-const getUserPassword = async (name: string) => {
+const getAndCompareUserPassword = async (name: string, password: string) => {
   const { data } = await supabase
     .from("users")
     .select("password")
     .eq("name", name);
 
-  return data ? data[0]?.password : undefined;
+  if (!data || !data[0].password) return undefined;
+
+  return bcrypt.compareSync(password, data[0]?.password);
 };
 
 const upsertLinks = async (userId: number, links: Link[]) => {
@@ -47,9 +51,9 @@ export const updateLinksList = async (
   dbLinks: Link[],
   newLinks: Link[]
 ) => {
-  const userPassword = await getUserPassword(userName);
+  const isGoodPassword = await getAndCompareUserPassword(userName, password);
 
-  if (password !== userPassword) {
+  if (!isGoodPassword) {
     return "bad password";
   }
 
@@ -84,9 +88,9 @@ export const updateLinksList = async (
 };
 
 export const removeUser = async (userName: string, password: string) => {
-  const userPassword = await getUserPassword(userName);
+  const isGoodPassword = await getAndCompareUserPassword(userName, password);
 
-  if (password !== userPassword) {
+  if (!isGoodPassword) {
     return "bad password";
   }
 
@@ -97,6 +101,8 @@ export const removeUser = async (userName: string, password: string) => {
 };
 
 export const addUser = async (userName: string, password: string) => {
-  const res = await supabase.from("users").insert({ name: userName, password });
+  const res = await supabase
+    .from("users")
+    .insert({ name: userName, password: saltAndPepperPassword(password) });
   return res;
 };

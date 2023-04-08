@@ -187,7 +187,7 @@ const EditPage = ({ dbLinks, user }: EditPageProps) => {
               <button onClick={() => handleSubmit()}>submit</button>
             )}
           </div>
-          {!userExists && (
+          {!userExists && password.length > 0 && (
             <button className="-mt-3 mb-1" onClick={() => handleAddUser()}>
               claim
             </button>

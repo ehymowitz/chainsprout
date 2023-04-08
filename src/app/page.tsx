@@ -37,6 +37,15 @@ export default function Home() {
           className="ml-3 px-3 border hover:italic hover:cursor-pointer"
         />
       </form>
+      <div className="absolute bottom-10 mx-36">
+        <p>
+          WARNING: This tool is very much in development. When you put
+          information on here it very well could be deleted if I mess something
+          up. So back up your data. I&apos;m making this tool as a musician and
+          for musicians, so if you have any suggestions for features feel free
+          to reach me at ehymowitz@gmail.com
+        </p>
+      </div>
     </main>
   );
 }
